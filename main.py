@@ -1,11 +1,11 @@
+# TODO: implement continuity checks using limit defenition from left and right on a given interval
 from math import sin, cos, tan, asin, acos, atan, pi, isclose
 from rich import print
 from time import sleep
 from rich.prompt import Prompt
 
 
-def sub(function: str, new_str: str) -> str:
-    function = list(function)
+def sub(function: list[str], new_str: str) -> str:
     new_function = ""
 
     for _ in range(function.count("x")):
@@ -17,16 +17,14 @@ def sub(function: str, new_str: str) -> str:
     return new_function
 
 
-def calculate() -> str:
-    function = input("Enter the function: ")
-    c = int(input("Enter what number x is approaching: "))
-
+def limit(function: str, c: float) -> tuple[float | str, list[float]]:
+    """Calculates the limit of `function` as x approaches `c`"""
     limit_table = [c - 0.01, c - 0.001, c - 0.0001, c + 0.0001, c + 0.001, c + 0.01]
-    values = [eval(sub(function, i)) for i in limit_table]
+    values = [eval(sub(list(function), str(i))) for i in limit_table]
 
     limit = (
         (
-            round(values[0])
+            float(round(values[0]))
             if values[0] > 1
             else (
                 round(values[0], 3)
@@ -38,13 +36,38 @@ def calculate() -> str:
         else "D.N.E"
     )
 
-    return f"The limit of {function} as x approaches {c} is {limit}"
+    return limit, values
+
+
+def calculate() -> str:
+    function = input("Enter the function: ")
+    c = float(input("Enter what number x is approaching: "))
+
+    return f"The limit of {function} as x approaches {c} is {limit(function, c)[0]}"
+
+
+def continuity() -> bool:
+    """Returns if a given function is continuous on a given interval"""
+    function = input("Enter the function: ")
+    left_end = float(input("Enter the left edge of the interval: "))
+    right_end = float(input("Enter enter the right edge of the interval: "))
+
+    interval = [left_end, right_end]
+
+    left = limit(function, interval[0])[1][:3]
+    right = limit(function, interval[1])[1][3:]
+
+    print(left, right)
+
+    return isclose(left[0], left[2], rel_tol=0.1) and isclose(
+        right[0], right[2], rel_tol=0.1
+    )
 
 
 def main() -> None:
     help = Prompt.ask(
         "Would you like to view formatting help, calculate a limit or quit?",
-        choices=["help", "calculate", "quit"],
+        choices=["help", "calculate a limit", "check for continuity", "quit"],
     )
 
     if help == "help":
@@ -57,8 +80,11 @@ def main() -> None:
         sleep(3)
         main()
 
-    elif help == "calculate":
+    elif help == "calculate a limit":
         print(calculate())
+
+    elif help == "check for continuity":
+        print(continuity())
 
     elif help == "quit":
         quit()
