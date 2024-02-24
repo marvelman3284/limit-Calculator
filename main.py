@@ -1,4 +1,3 @@
-# TODO: implement continuity checks using limit defenition from left and right on a given interval
 from math import sin, cos, tan, asin, acos, atan, pi, isclose
 from rich import print
 from time import sleep
